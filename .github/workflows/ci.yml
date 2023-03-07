@@ -1,0 +1,126 @@
+name: Playwright E2E Test & Vercel Deployment
+on:
+  push:
+    branches: [main, develop, "hotfix/**", "release/**"]
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop, "hotfix/**", "release/**"]
+concurrency:
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+  # head_ref: 동일 PR이면 이전에 실행된 workflow 취소
+  # ref: 동일한 branch이면 이전에 실행된 workflow 취소
+  # run_id: 앞의 두 경우 모두에 해당 없으면 실행됨
+  group: ${{ github.head_ref || github.ref || github.run_id }}
+  cancel-in-progress: true
+jobs:
+  # 웹 서버 실행을 위한 조건을 갖춘 후 build 실행
+  # build 후에 테스트를 위한 패키지 설치 후 테스트 진행
+  # 테스트를 통과하면 Vercel로 배포 진행
+  # build:
+  #   timeout-minutes: 5
+  #   runs-on: ubuntu-latest # self-hosted || ubuntu-latest
+  #   if: "!contains(github.event.head_commit.message, '--skip-ci')"
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 16
+  #     - name: Use Package Cache
+  #       uses: actions/cache@v3
+  #       id: yarn-cache
+  #       with:
+  #         path: "**/node_modules"
+  #         key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+  #     - if: steps.yarn-cache.outputs.cache-hit == 'true'
+  #       run: echo 'yarn cache hit!'
+  #     - if: steps.yarn-cache.outputs.cache-hit != 'true'
+  #       name: Install dependencies
+  #       run: echo 'yarn cache missed!' && yarn install --frozen-lockfile
+  #     - name: Make .env # 웹 서버 빌드 및 실행을 위해서 필요
+  #       run: |
+  #         echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.production
+  #         echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.production
+  #         echo "BUILD_DIR=$BUILD_DIR" >> .env.production
+  #       env:
+  #         NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  #         NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+  #         BUILD_DIR: ${{ secrets.BUILD_DIR }}
+  # - name: Build App
+  #   run: yarn build
+  # - name: Upload build artifacts
+  #   uses: actions/upload-artifact@v3
+  #   with:
+  #     name: build-output # 빌드 결과물에 이름을 부여하여 저장
+  #     path: ./app/${{ secrets.BUILD_DIR }} # 업로드할 결과물 path
+  #     if-no-files-found: error
+
+  # e2e:
+  #   timeout-minutes: 10
+  #   runs-on: ubuntu-latest # self-hosted || ubuntu-latest
+  #   if: "!contains(github.event.head_commit.message, '--skip-ci')"
+  #   needs: build
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 16
+  #     # 이전에 업로드 했던 빌드 결과물을 다운로드
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: build-output
+  #         # 아티팩트를 어느 위치에 둘 것인지 설정
+  #         path: ./app/${{ secrets.BUILD_DIR }}
+  #     - name: Use Package Cache
+  #       uses: actions/cache@v3
+  #       id: yarn-cache
+  #       with:
+  #         path: "**/node_modules"
+  #         key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+  #     - name: Use Playwright Cache
+  #       uses: actions/cache@v3
+  #       id: playwright-cache
+  #       with:
+  #         path: "~/.cache/ms-playwright"
+  #         key: "${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}"
+  #         restore-keys: |
+  #           ${{ runner.os }}-playwright-
+  #     - if: steps.playwright-cache.outputs.cache-hit == 'true'
+  #       run: echo 'playwright cache hit!'
+  #     - name: Install Playwright Deps # 브라우저 외의 다른 패키지를 설치하기 위해 사용
+  #       run: npx playwright install --with-deps
+  #     - name: Make .env # 웹 서버 실행을 위해서 필요
+  #       run: |
+  #         echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.production
+  #         echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.production
+  #         echo "BUILD_DIR=$BUILD_DIR" >> .env.production
+  #       env:
+  #         NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  #         NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+  #         BUILD_DIR: ${{ secrets.BUILD_DIR }}
+  #     - name: Run Playwright tests
+  #       run: yarn test:e2e-ci
+
+  deploy:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest # self-hosted || ubuntu-latest
+    # needs: e2e
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      # - name: Use Package Cache
+      #   uses: actions/cache@v3
+      #   id: yarn-cache
+      #   with:
+      #     path: "**/node_modules"
+      #     key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID}} #Required
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID}} #Required
+          github-token: ${{ secrets.GH_TOKEN }} #Optional
+          vercel-args: ${{ github.ref_name == 'main' && '--prod' || '' }} #Optional

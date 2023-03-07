@@ -1,0 +1,81 @@
+{
+  "name": "nextjs-trpc-template",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "yarn@3.4.1",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest --watch"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/style": "^0.8.0",
+    "@emotion/styled": "^11.10.6",
+    "@next/font": "13.1.6",
+    "@tanstack/react-query": "^4.24.10",
+    "@trpc/client": "^10.12.0",
+    "@trpc/next": "^10.12.0",
+    "@trpc/react-query": "^10.12.0",
+    "@trpc/server": "^10.12.0",
+    "@types/node": "18.13.0",
+    "@types/react": "18.0.28",
+    "@types/react-dom": "18.0.11",
+    "classnames": "^2.3.2",
+    "dotenv": "^16.0.3",
+    "env-cmd": "^10.1.0",
+    "eslint": "8.34.0",
+    "eslint-config-next": "13.1.6",
+    "next": "13.1.6",
+    "next-auth": "^4.19.2",
+    "next-seo": "^5.15.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-icons": "^4.7.1",
+    "react-is": "^18.2.0",
+    "styled-components": "^5.3.6",
+    "zod": "^3.20.6"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.31.2",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@types/jest": "^29.4.0",
+    "@types/nodemailer": "^6",
+    "@types/prettier": "^2",
+    "@types/styled-components": "^5",
+    "@types/testing-library__jest-dom": "^5.14.5",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
+    "autoprefixer": "^10.4.13",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.3",
+    "jest": "^29.4.3",
+    "jest-environment-jsdom": "^29.4.3",
+    "lint-staged": "^13.1.2",
+    "next-sitemap": "^4.0.2",
+    "postcss": "^8.4.21",
+    "prettier": "^2.8.4",
+    "tailwindcss": "^3.2.7",
+    "typescript": "^4.9.5"
+  },
+  "lint-staged": {
+    "./*/**/*.{js,jsx,ts,tsx}": [
+      "yarn prettier:fix",
+      "yarn eslint:fix"
+    ],
+    "*.{json,md}": [
+      "yarn prettier:fix"
+    ]
+  }
+}

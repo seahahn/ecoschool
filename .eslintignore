@@ -1,0 +1,15 @@
+.next
+public
+dist
+node_modules
+yarn.lock
+package-lock.json
+**/*.test.js
+coverage
+
+.eslintignore
+.eslintrc.js
+.gitignore
+.prettierrc.js
+Dockerfile
+docker-compose.yml
